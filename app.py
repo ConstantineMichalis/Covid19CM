@@ -7,6 +7,12 @@ import flask
 import dash; import dash_core_components as dcc; import dash_html_components as html
 from dash.dependencies import Input, Output
 
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets, meta_tags=[{"name": "viewport", "content": "width=device-width"}])
+
+# Associating server
+server = app.server
+
 data = pd.read_csv('./OxCGRT_summary20200520.csv', sep= ',')
 countries = pd.read_csv('./country-and-continent.csv', sep= ',')
 
@@ -59,9 +65,7 @@ dftop = dftop.sort_values(by=['ConfirmedCases'], ascending=False).head(5)
 #Question 5)b)
 mycols = ['#e4717a', '#5d8aa8', '#a4c639', '#ffa812', '#a67b5b', '#915c83']
 
-server = flask.Flask(__name__)
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets) 
 
 fig = px.scatter_geo(df, locations="CountryCode", color="Continent_Name", 
                      size="ConfirmedCases", scope = "world",size_max=80, animation_frame="Date", 
@@ -101,8 +105,6 @@ def updatefig(g,d):
     elif g=="all" and d!="ConfirmedCases": return  px.scatter_geo(df, locations="CountryCode", color="Continent_Name", scope = "world", size=d, size_max=20, title = d+" Globally", animation_frame="Date", projection="equirectangular"), px.line(df[df['CountryCode'].isin(dftop['CountryCode'])], x="FullDate", y=d,color='CountryCode', color_discrete_sequence   = mycols, title = d+" in the top five countries")
     elif g!="all" and d!="ConfirmedCases": return  px.scatter_geo(df, locations="CountryCode", color="Continent_Name", scope = g, size=d, size_max=20, title = d+" in "+g, animation_frame="Date", projection="equirectangular"), px.line(df[df['CountryCode'].isin(dftop['CountryCode'])], x="FullDate", y=d,color='CountryCode', color_discrete_sequence   = mycols, title = d+" in the top five countries")
     else: return  px.scatter_geo(df, locations="CountryCode", color="Continent_Name", scope = g, size='ConfirmedCases', size_max=80, title = d+" in "+g, animation_frame="Date", projection="equirectangular"), fig2
-
-app.run_server(debug=True, use_reloader=False)
 
 # Run the Dash app
 if __name__ == "__main__":
